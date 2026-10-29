@@ -1,85 +1,87 @@
-# Sistema de gestión del catálogo de servicios de TI
+# Service Desk de TI con CMDB — Parcial 3 (amplía el Parcial 2)
 
-Parcial — Software Avanzado, Facultad de Ingeniería, USAC. Aplicación web que importa el catálogo de `data/CatalogoServicios.xlsx`, lo mantiene, y agrega estructura organizacional, usuarios y responsables de servicios.
+Software Avanzado, Facultad de Ingeniería, USAC. Aplicación web de Service Desk que amplía el sistema del catálogo de servicios del parcial práctico 2: tickets, colas, roles, siete procesos de gestión (lección 25) y una CMDB con 5,000 dispositivos sintéticos.
 
 | | |
 |---|---|
 | **Integrante** | Susan — carné: `__________` |
-| **Rama de entrega** | `main` · etiqueta `parcial-v2.0` |
+| **Rama** | `main` |
 | **Tecnologías** | Python 3.12, FastAPI, SQLAlchemy 2, PostgreSQL 16, HTML/JS, Docker Compose |
-| **Documentación técnica** | [`docs/RESOLUCION.md`](docs/RESOLUCION.md) · contexto para IA: [`AGENTS.md`](AGENTS.md) |
+
+## Dónde está cada entregable
+| Entregable | Archivo |
+|---|---|
+| Alcance, arquitectura, decisiones, limitaciones | [`docs/RESOLUCION.md`](docs/RESOLUCION.md) |
+| Diagrama ER, diccionario, jerarquía CMDB, mapeo de fuentes | [`docs/MODELO.md`](docs/MODELO.md) |
+| Tipos, colas, permisos, estados, transiciones, aprobaciones, escalamiento | [`docs/PROCESOS.md`](docs/PROCESOS.md) |
+| Prompts, contexto, harness, loops y grafos (con commits) | [`docs/IA.md`](docs/IA.md) |
+| Matriz requisito → implementación → prueba → evidencia y resultados | [`docs/PRUEBAS.md`](docs/PRUEBAS.md) |
+| Contexto para asistentes de IA | [`AGENTS.md`](AGENTS.md), [`docs/contexto/`](docs/contexto/) |
+| Evidencias (logs reales) | [`docs/evidencias/`](docs/evidencias/) (`parcial3/`, `loops/`) |
+| Archivos fuente sin modificar | `data/CatalogoServicios.xlsx`, `data/CMDB.xlsx` (hash en `data/CHECKSUMS.sha256`), `docs/contexto/*.pdf` |
+| Base del parcial 2 | [`docs/RESOLUCION-parcial2.md`](docs/RESOLUCION-parcial2.md) |
 
 ## 1. Requisitos
-- Docker Engine **24+** y Docker Compose **v2.20+** (`docker compose version`).
-- Puerto `8000` libre (cambiable con `APP_PORT` en `.env`).
-- No se necesita Python, PostgreSQL ni ninguna clave de proveedores de IA en el equipo.
+Docker Engine 24+ y Docker Compose v2.20+. Puerto 8000 libre (`APP_PORT`). No hace falta instalar Python, PostgreSQL ni claves de proveedores de IA.
 
 ## 2. Configuración
 ```bash
-git clone <URL-del-repositorio> parcial-catalogo-servicios
-cd parcial-catalogo-servicios
-cp .env.example .env          # en Windows: copy .env.example .env
-# edite .env si desea otras contraseñas de demostración
+git clone <URL-del-repositorio> && cd <carpeta>
+cp .env.example .env        # contraseñas SOLO de demostración; .env no se versiona
 ```
-`data/CatalogoServicios.xlsx` es el archivo original sin modificar; el contenedor lo monta en **solo lectura**.
 
-## 3. Levantar el sistema
+## 3. Levantar y preparar datos
 ```bash
 docker compose up --build -d
-docker compose ps             # db y app deben quedar "healthy"
+docker compose ps                                   # db y app "healthy"
+docker compose exec app sh scripts/preparar.sh     # idempotente: migra, importa catálogo, organización,
+                                                    # CMDB.xlsx, 5,000 CI (semilla 2026) y datos del Service Desk
 ```
-- URL: **http://localhost:8000**
-- Al arrancar, `app` espera a que la base esté disponible (healthcheck + reintentos) y aplica las migraciones pendientes.
-- Salud: `http://localhost:8000/health`
+URL: **http://localhost:8000** · salud: `/health` · API interactiva: `/docs`.
 
-## 4. Importar el Excel y crear cuentas de evaluación
-```bash
-docker compose exec app python -m scripts.import_excel --observaciones   # importa 12 N1 / 46 N2 e imprime incidencias
-docker compose exec app python -m scripts.seed_demo                      # organización demo, cuentas y 3 asignaciones
-```
-El orden importa: `seed_demo` crea las 3 asignaciones sobre servicios ya importados (si se ejecuta antes, se puede repetir; es idempotente). La importación también se puede ejecutar desde la interfaz (**Importación → Importar**) con el rol administrador. Repetirla no duplica registros.
+`preparar.sh` ejecuta, en orden y dentro del contenedor: `scripts.migrate`, `scripts.import_excel` (12/46), `scripts.seed_demo` (organización y cuentas), `scripts.import_cmdb` (CI de CMDB.xlsx), `scripts.generar_cmdb` (5,000 CI) y `scripts.seed_service_desk` (usuarios por rol, 10 colas, 39 tickets en distintos estados con E0–E3 e I0–I6). Repetirlo no duplica nada.
 
-| Rol | Usuario | Contraseña |
+## 4. Cuentas de evaluación (locales, de demostración)
+| Usuario | Rol(es) | Contraseña (variable de `.env`) |
 |---|---|---|
-| administrador | valor de `DEMO_ADMIN_USUARIO` (por defecto `admin`) | valor de `DEMO_ADMIN_PASSWORD` en `.env` |
-| consulta | valor de `DEMO_CONSULTA_USUARIO` (por defecto `consulta`) | valor de `DEMO_CONSULTA_PASSWORD` en `.env` |
+| `admin` | administrador | `DEMO_ADMIN_PASSWORD` |
+| `consulta` | consulta (solo lectura) | `DEMO_CONSULTA_PASSWORD` |
+| `solicitante` | solicitante | `DEMO_USUARIOS_PASSWORD` |
+| `agente1`, `agente2` | agente | `DEMO_USUARIOS_PASSWORD` |
+| `aprobador` | aprobador + agente | `DEMO_USUARIOS_PASSWORD` |
 
-Credenciales **solo de demostración**, configuradas localmente en `.env` (no versionado). Los usuarios `ana.redes` y `luis.apps` (rol consulta, misma contraseña que la cuenta de consulta) existen para mostrar responsables. La estructura organizacional demo es ficticia: **no proviene del Excel**.
+Vistas: **Portal** (solicitante: registrar, ver sus tickets, FAQ, notificaciones), **Consola** (agentes: filtros, ficha, toma, transiciones, transferir/escalar, comentarios, adjuntos, bitácora), **Colas** (configuración, miembros, tomar siguiente, niveles), **CMDB** (clasificación, búsqueda paginada de 5,000 CI, relaciones navegables, impacto), **Tablero** (indicadores), y las vistas del parcial 2.
 
 ## 5. Pruebas y verificación
 ```bash
-docker compose exec app pytest -v                 # P01–P11 sobre la base aislada catalogo_test
-docker compose exec app sh scripts/check.sh      # harness completo: Excel intacto, lint, migraciones, pruebas
-sh scripts/p12_persistencia.sh                   # P12: reinicio de contenedores sin borrar volúmenes (desde el anfitrión)
+docker compose exec app pytest -v                # P01–P17 + parcial 2, base aislada catalogo_test
+docker compose exec app sh scripts/check.sh     # harness: fuentes intactas, lint, secretos, migraciones,
+                                                 # pruebas y conteos 12/46/5000/35 -> exit 0/1
+sh scripts/p18_persistencia.sh                  # P18 desde el anfitrión: reinicio sin perder datos
 ```
-`check.sh` termina con `RESULTADO: TODO EN VERDE` y código 0, o indica qué control falló. Las pruebas nunca tocan la base de evaluación `catalogo`. Detalle por escenario en `docs/RESOLUCION.md` §7–§8.
+Generador manual: `docker compose exec app python -m scripts.generar_cmdb --semilla 2026 --cantidad 5000` (repetir no duplica). Borrado **explícito** de un lote: `… --semilla 2026 --borrar`.
 
-> Si el volumen de la BD se creó con una versión anterior del repositorio y no existe `catalogo_test`, créela una vez con
-> `docker compose exec db psql -U catalogo -c "CREATE DATABASE catalogo_test;"`.
+> Si el volumen se creó antes de existir `catalogo_test`: `docker compose exec db psql -U catalogo -c "CREATE DATABASE catalogo_test;"`.
 
 ## 6. Operación
 | Acción | Comando |
 |---|---|
-| Ver logs | `docker compose logs -f app` (o `db`) |
-| Detener (conserva datos) | `docker compose stop` |
-| Iniciar de nuevo | `docker compose start` |
-| Apagar y quitar contenedores (conserva datos) | `docker compose down` |
-| Reconstruir tras cambios | `docker compose up --build -d` |
-| **Reinicio destructivo** (borra la BD de evaluación) | `docker compose down -v` y luego repetir §3 y §4 |
+| Logs | `docker compose logs -f app` |
+| Detener / iniciar (conserva datos) | `docker compose stop` / `docker compose start` |
+| Apagar (conserva datos) | `docker compose down` |
+| **Reinicio destructivo** (borra todo) | `docker compose down -v`, luego §3 |
 
 ## 7. Estructura
 ```text
-AGENTS.md                 contexto para asistentes de IA
-compose.yaml, Dockerfile, .dockerignore, .env.example
-migrations/               migraciones SQL numeradas
-src/app/                  aplicación (API, servicios de negocio, importador, interfaz en static/)
-src/scripts/              migrate, import_excel, seed_demo, p12
-scripts/                  entrypoint.sh, check.sh (harness), p12_persistencia.sh
-tests/                    pytest P01–P11 + reglas del importador (fixtures/excel_sintetico.py)
-data/CatalogoServicios.xlsx   archivo original
-docs/RESOLUCION.md        documento de resolución
-docs/contexto/ docs/prompts/ docs/evidencias/
+AGENTS.md  compose.yaml  Dockerfile  .dockerignore  .env.example  requirements.txt
+migrations/001–004            esquema (parcial 2 + Service Desk + CMDB)
+src/app/                      api.py, api_sd.py, services/ (permisos, tickets, procesos, colas, cmdb, indicadores…), static/
+src/scripts/                  migrate, import_excel, seed_demo, import_cmdb, generar_cmdb, seed_service_desk
+scripts/                      preparar.sh, check.sh, p18_persistencia.sh, p12_persistencia.sh, entrypoint.sh
+tests/                        test_service_desk.py (P01–P17) + pruebas del parcial 2
+data/                         CatalogoServicios.xlsx, CMDB.xlsx, CHECKSUMS.sha256, referencia/
+docs/                         RESOLUCION, MODELO, PROCESOS, IA, PRUEBAS, contexto/, evidencias/, prompts/
 ```
 
 ## 8. Acceso del catedrático
-El usuario de GitHub **`maldanap-usac`** fue agregado como colaborador del repositorio. Estado de la invitación: `__________` (aceptada / pendiente).
+Colaborador `maldanap-usac` invitado (ver `docs/evidencias/invitacion-colaborador.png`).
