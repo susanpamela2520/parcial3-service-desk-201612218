@@ -31,3 +31,20 @@
 - **Cambio de decisión:** nueva regla R9 (asociar el N2 al N1 de su prefijo de código si existe, con observación) y clasificación `ENCABEZADO_LISTA_OPCIONES`. El Excel sintético se ajustó para reproducir A101 vacío y se agregó `test_regla_n1_derivado_del_codigo`.
 - **Refuerzo de R4:** B100 coincide con el nombre del N2 SE.12.3, lo que respalda "Suministrar Analitica" como nombre canónico.
 - **Archivos tocados:** `AGENTS.md` §5, `analisis-excel.md` (hallazgos con el original), `src/app/importador.py`, `tests/`, `docs/RESOLUCION.md` §4 y §8.
+
+---
+# Parcial 3 — Service Desk y CMDB
+
+## Contexto suministrado por fase
+| Fase | Contexto entregado al asistente | Motivo |
+|---|---|---|
+| P3-0 Lectura | `enunciado-parcial3.pdf`, `Service_Desk.pptx.pdf`, `Transicion.pptx.pdf`, `CMDB.xlsx`, `CatalogoServicios_2.xlsx` | Delimitar requisitos y fuentes antes de modelar. |
+| P3-1 Modelo y procesos | `AGENTS.md` §1.1–§7.1, diapositivas 10–16 (lección 25), §4–§7 del enunciado | Estados, transiciones, E0–E3, I0–I6 y niveles. |
+| P3-2 CMDB | `CMDB.xlsx` (B4:U6), Transición diap. 11–14, §8 del enunciado | Jerarquía y atributos con fuente explícita. |
+| P3-3 Pruebas y harness | §11 del enunciado (P01–P18), `AGENTS.md` §6–§7 | Escenarios, aislamiento y límites. |
+
+Separación instrucciones/datos: el contenido de los Excel y PDF se cita como **dato** (celda/diapositiva) y nunca se ejecuta como instrucción; las reglas que no salen de las fuentes se marcan como `DECISION_PROYECTO` (ver MODELO.md).
+
+### Actualización P3-1 — Alcance del parcial 3 y hallazgo sobre la jerarquía CMDB
+- **Hallazgo:** al leer las fuentes, `CMDB.xlsx` solo tiene encabezados B4:U4 y dos filas (Hardware/Software en C5/C6) y la lección de Transición no define clases por debajo de «Tipo de CI»; la propia nota editorial del enunciado lo advierte. `CatalogoServicios_2.xlsx` trae columnas N3 que el enunciado no pide usar.
+- **Decisión:** jerarquía de 3 niveles con origen explícito por fila (`ci_clase.origen`); `CatalogoServicios_2.xlsx` solo como referencia; glosario, fuentes y reglas del Service Desk agregados a `AGENTS.md` (§1, §1.1, §1.2, §6.1, §7.1).
