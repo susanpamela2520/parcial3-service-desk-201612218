@@ -52,3 +52,7 @@ Separación instrucciones/datos: el contenido de los Excel y PDF se cita como **
 ### Actualización P3-2 — Regla de ejecución de migraciones (Loop 3)
 - **Hallazgo:** al preparar el entorno, `003_service_desk.sql` falló con `only '%s', '%b', '%t' are allowed as placeholders` por los porcentajes de referencia de la lección 25 (20 %, 70 %, 5 %).
 - **Decisión:** ejecutar migraciones con el cursor del driver sin parámetros y registrar la regla en `AGENTS.md` §7.2 para que el asistente no reintroduzca el problema.
+
+### Actualización P3-3 — Regla de resolución al cerrar (Loop 1)
+- **Hallazgo:** `test_p09[EVENTO]` falló: un evento E1 cerrado tenía `resuelto_en = NULL` (`docs/evidencias/loops/loop1-fallo.log`).
+- **Decisión:** el cierre cuenta como resolución si no hubo estado de resolución; regla agregada a `AGENTS.md` §7.3 junto con la política de no relajar aserciones (en la misma sesión dos expectativas de prueba mal calculadas —P12 con 600 min y el tipo de excepción del trigger de bitácora— se corrigieron en la prueba y quedaron explicadas en `docs/IA.md`).

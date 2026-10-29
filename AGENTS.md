@@ -88,6 +88,10 @@ Este archivo es el punto de entrada para cualquier asistente (Claude, Copilot, C
 ## 7.2 **[Actualización P3-2]** Migraciones con texto literal
 - `scripts/migrate.py` ejecuta cada archivo SQL con el cursor del driver **sin parámetros**. Motivo: la migración 003 contiene literales como `'20 %'` y psycopg interpretaba `%` como marcador (Loop 3, `docs/evidencias/loops/loop3-*.log`). No volver a `exec_driver_sql` para archivos de migración.
 
+## 7.3 **[Actualización P3-3]** Resolución y cierre de tickets
+- `resuelto_en` se fija al entrar a un estado de `Flujo.resuelto`; si un ticket llega a `CERRADO` sin haber pasado por uno (eventos E0 y E1, que no requieren respuesta), el cierre cuenta como resolución. Motivo: Loop 1 (P09-EVENTO) detectó eventos cerrados sin `resuelto_en`, lo que los excluía de los indicadores.
+- Una prueba que falla por una expectativa mal calculada se corrige en la prueba y se documenta; una que falla por comportamiento se corrige en el código. Nunca se relaja una aserción para que pase.
+
 ## 8. Convenciones
 - Código e identificadores en español, sin tildes. Mensajes de error al usuario en español claro.
 - Validación de negocio en `src/app/services/`, nunca solo en la UI.
