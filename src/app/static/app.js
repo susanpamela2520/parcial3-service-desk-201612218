@@ -64,7 +64,7 @@ async function iniciar() {
   $("#vista-login").hidden = true;
   $("#vista-app").hidden = false;
   $("#quien").textContent = `${yo.nombre} · ${yo.rol}`;
-  ir("servicios");
+  ir(yo.rol === "solicitante" ? "portal" : yo.rol === "agente" || yo.rol === "aprobador" ? "consola" : "servicios");
 }
 
 $("#form-login").addEventListener("submit", async (e) => {
@@ -86,7 +86,9 @@ $("#menu").addEventListener("click", (e) => { if (e.target.dataset.vista) ir(e.t
 
 function ir(vista) {
   document.querySelectorAll("#menu button").forEach((b) => b.classList.toggle("activo", b.dataset.vista === vista));
-  ({ servicios: vistaServicios, n1: vistaN1, org: vistaOrg, usuarios: vistaUsuarios, catalogos: vistaCatalogos, importacion: vistaImportacion })[vista]();
+  const vistas = { servicios: vistaServicios, n1: vistaN1, org: vistaOrg, usuarios: vistaUsuarios, catalogos: vistaCatalogos,
+    importacion: vistaImportacion, ...(window.VISTAS_SD || {}) };
+  vistas[vista]().catch?.((e) => aviso(e.message));
 }
 
 // ------------------------------------------------------------------ servicios N2

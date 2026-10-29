@@ -1,3 +1,4 @@
+[hidden] { display: none !important; }
 :root {
   --fondo: #f4f5f7; --superficie: #fff; --texto: #1d2330; --suave: #5d6677; --borde: #d9dde5;
   --primario: #1f5fa8; --primario-hover: #174a85; --peligro: #b3261e; --ok: #1e7b46; --aviso: #8a5a00;

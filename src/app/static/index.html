@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Catálogo de Servicios de TI</title>
+  <title>Service Desk de TI</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
@@ -19,8 +19,13 @@
 
   <div id="vista-app" hidden>
     <header class="barra">
-      <strong>Catálogo de Servicios de TI</strong>
+      <strong>Service Desk de TI</strong>
       <nav id="menu">
+        <button data-vista="portal">Portal</button>
+        <button data-vista="consola">Consola</button>
+        <button data-vista="colas">Colas</button>
+        <button data-vista="cmdb">CMDB</button>
+        <button data-vista="tablero">Tablero</button>
         <button data-vista="servicios" class="activo">Servicios</button>
         <button data-vista="n1">Nivel 1</button>
         <button data-vista="org">Organización</button>
@@ -37,5 +42,6 @@
   <dialog id="dialogo"><div id="dialogo-cuerpo"></div></dialog>
   <div id="aviso" role="status"></div>
   <script src="/static/app.js"></script>
+  <script src="/static/sd.js"></script>
 </body>
 </html>

@@ -1,0 +1,53 @@
+# Preparación completa sobre BD vacía — 2026-10-29T14:17:08-06:00 — commit 9d2100d (+ cambios de UI/harness sin commit)
+# Entorno: sesión de IA, PostgreSQL 16 local (Docker Hub no accesible desde la sesión)
+$ sh scripts/preparar.sh
+[migrate] aplicada 001_esquema_inicial.sql
+[migrate] aplicada 002_catalogos_base.sql
+[migrate] aplicada 003_service_desk.sql
+[migrate] aplicada 004_cmdb_clasificacion.sql
+[import] resumen:
+[import] servicios con observaciones: SE.12.1, SE.12.2, SE.12.3
+[seed] estructura organizacional demo y cuentas 'admin' (administrador) y 'consulta' (consulta) listas
+[seed] SE.01.01 -> sección REDES, responsable ana.redes
+[seed] SE.01.02 -> sección APPS, responsable luis.apps
+[seed] SE.01.03 -> sección SOPORTE
+[cmdb.xlsx] CI creados: 3; CI de referencia: ['Aplicación', 'Base de Datos1', 'Servidor1']
+  - K6='Servidor1' no es una ubicación física; se usa la ubicación de Servidor1 y se crea ALOJADO_EN
+  - I5='Base de Datos1' es referenciado pero no tiene fila propia: se crea como CI de clase SW-BD
+[cmdb] {"lote": "SEMILLA-2026", "solicitados": 5000, "insertados": 5000, "omitidos_existentes": 0}
+[cmdb] total en el lote: 5000 (códigos distintos 5000)
+  nivel 2 HW   Hardware      3379
+  nivel 2 MED  Medios         233
+  nivel 2 SW   Software      1388
+  nivel 3 HW-ALM   Almacenamiento               144
+  nivel 3 HW-CAM   Cámara de seguridad          417
+  nivel 3 HW-EST   Estación de trabajo         1527
+  nivel 3 HW-IMP   Impresora                    337
+  nivel 3 HW-RED   Equipo de red                395
+  nivel 3 HW-SRV   Servidor                     304
+  nivel 3 HW-UPS   UPS / corriente regulada     255
+  nivel 3 MED-INS  Medio de instalación         102
+  nivel 3 MED-RES  Medio de respaldo            131
+  nivel 3 SW-APP   Aplicación                   542
+  nivel 3 SW-BD    Base de datos                202
+  nivel 3 SW-LIC   Software licenciado          281
+  nivel 3 SW-SO    Sistema operativo            363
+[sd] usuarios: ['admin', 'agente1', 'agente2', 'aprobador', 'consulta', 'solicitante']; colas: ['ACC-N1', 'CAM-N2', 'EVT-N1', 'INC-N1', 'INC-N2', 'INC-N3', 'NS-N1', 'PRB-N2', 'SRV-N1', 'SRV-N1B']; tickets DEMO creados ahora: 39
+  ACCESO          5
+  CAMBIO          5
+  EVENTO          5
+  INCIDENTE       9
+  NUEVO_SERVICIO  5
+  PROBLEMA        5
+  SERVICIO_TI     5
+[preparar] listo
+
+
+$ sh scripts/preparar.sh   # segunda vez (idempotente)
+[import] servicios con observaciones: SE.12.1, SE.12.2, SE.12.3
+[cmdb.xlsx] CI creados: 0; CI de referencia: ['Aplicación', 'Base de Datos1', 'Servidor1']
+[cmdb] {"lote": "SEMILLA-2026", "solicitados": 5000, "insertados": 0, "omitidos_existentes": 5000}
+[cmdb] total en el lote: 5000 (códigos distintos 5000)
+[sd] los tickets de demostración ya existen; no se duplican
+[sd] usuarios: ['admin', 'agente1', 'agente2', 'aprobador', 'consulta', 'solicitante']; colas: ['ACC-N1', 'CAM-N2', 'EVT-N1', 'INC-N1', 'INC-N2', 'INC-N3', 'NS-N1', 'PRB-N2', 'SRV-N1', 'SRV-N1B']; tickets DEMO creados ahora: 0
+[preparar] listo
