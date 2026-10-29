@@ -48,3 +48,7 @@ Separación instrucciones/datos: el contenido de los Excel y PDF se cita como **
 ### Actualización P3-1 — Alcance del parcial 3 y hallazgo sobre la jerarquía CMDB
 - **Hallazgo:** al leer las fuentes, `CMDB.xlsx` solo tiene encabezados B4:U4 y dos filas (Hardware/Software en C5/C6) y la lección de Transición no define clases por debajo de «Tipo de CI»; la propia nota editorial del enunciado lo advierte. `CatalogoServicios_2.xlsx` trae columnas N3 que el enunciado no pide usar.
 - **Decisión:** jerarquía de 3 niveles con origen explícito por fila (`ci_clase.origen`); `CatalogoServicios_2.xlsx` solo como referencia; glosario, fuentes y reglas del Service Desk agregados a `AGENTS.md` (§1, §1.1, §1.2, §6.1, §7.1).
+
+### Actualización P3-2 — Regla de ejecución de migraciones (Loop 3)
+- **Hallazgo:** al preparar el entorno, `003_service_desk.sql` falló con `only '%s', '%b', '%t' are allowed as placeholders` por los porcentajes de referencia de la lección 25 (20 %, 70 %, 5 %).
+- **Decisión:** ejecutar migraciones con el cursor del driver sin parámetros y registrar la regla en `AGENTS.md` §7.2 para que el asistente no reintroduzca el problema.

@@ -85,6 +85,9 @@ Este archivo es el punto de entrada para cualquier asistente (Claude, Copilot, C
 - Bitácora inmutable (trigger). No borrar historial; las bajas son lógicas.
 - CMDB: las fuentes solo definen **CI → Tipo de CI (Hardware, Software) y CI de medios**. Todo nivel inferior es `DECISION_PROYECTO` y así debe quedar marcado en `ci_clase.origen`. No inventar niveles atribuidos a las diapositivas.
 
+## 7.2 **[Actualización P3-2]** Migraciones con texto literal
+- `scripts/migrate.py` ejecuta cada archivo SQL con el cursor del driver **sin parámetros**. Motivo: la migración 003 contiene literales como `'20 %'` y psycopg interpretaba `%` como marcador (Loop 3, `docs/evidencias/loops/loop3-*.log`). No volver a `exec_driver_sql` para archivos de migración.
+
 ## 8. Convenciones
 - Código e identificadores en español, sin tildes. Mensajes de error al usuario en español claro.
 - Validación de negocio en `src/app/services/`, nunca solo en la UI.
