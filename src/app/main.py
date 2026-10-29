@@ -8,13 +8,15 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from .api import router
+from .api_sd import router as router_sd
 from .db import engine
 from .services.errores import NegocioError
 
 STATIC = Path(__file__).parent / "static"
 
-app = FastAPI(title="Catálogo de Servicios de TI", version="2.0")
+app = FastAPI(title="Catálogo de Servicios de TI", version="3.0")
 app.include_router(router)
+app.include_router(router_sd)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 

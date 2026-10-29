@@ -9,7 +9,7 @@ Política de desactivación (baja lógica, nunca DELETE):
 """
 from dataclasses import dataclass
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from ..models import Area, Departamento, Empresa, Puesto, Seccion, ServicioN2, Usuario
@@ -175,6 +175,8 @@ def desactivar_registro(db: Session, obj, cascada: bool = False, usuario_actual_
         o.activo = False
         if isinstance(o, Usuario):
             revocar_sesiones_usuario(db, o.id)
+            from .colas import liberar_tickets_de_usuario  # parcial 3: sin tickets huérfanos
+            liberar_tickets_de_usuario(db, usuario_actual_id or o.id, o.id)
     # Las secciones desactivadas conservan sus asignaciones históricas; se informan.
     secciones = [o.id for o in afectados if isinstance(o, Seccion)]
     servicios = []
@@ -207,7 +209,7 @@ def padre_de(obj) -> tuple | None:
 
 # ---------------------------------------------------------------- usuarios
 
-ROLES = ("administrador", "consulta")
+ROLES = ("administrador", "consulta", "solicitante", "agente", "aprobador")
 
 
 def ruta_organizacional(db: Session, puesto_id: int) -> dict:
@@ -229,8 +231,21 @@ def ruta_organizacional(db: Session, puesto_id: int) -> dict:
     }
 
 
+def _guardar_roles(db: Session, u: Usuario, data: dict):
+    if "roles_adicionales" not in data:
+        return
+    roles = set(data.get("roles_adicionales") or [])
+    if not roles <= set(ROLES):
+        raise NegocioError(f"Roles inválidos. Use {ROLES}.")
+    db.execute(text("DELETE FROM usuario_rol WHERE usuario_id=:u"), {"u": u.id})
+    for r in roles - {u.rol}:
+        db.execute(text("INSERT INTO usuario_rol (usuario_id, rol) VALUES (:u, :r)"), {"u": u.id, "r": r})
+
+
 def usuario_dict(db: Session, u: Usuario) -> dict:
     d = a_dict(u)
+    d["roles"] = sorted({u.rol} | {r for (r,) in db.execute(text("SELECT rol FROM usuario_rol WHERE usuario_id=:u"),
+                                                                {"u": u.id})})
     d["organizacion"] = ruta_organizacional(db, u.puesto_id)
     return d
 
@@ -268,13 +283,15 @@ def crear_usuario(db: Session, data: dict) -> dict:
         raise NegocioError("El correo no tiene un formato válido.")
     rol = data.get("rol")
     if rol not in ROLES:
-        raise NegocioError("El rol debe ser 'administrador' o 'consulta'.")
+        raise NegocioError(f"El rol debe ser uno de {ROLES}.")
     pw = _validar_password(data.get("password"))
     puesto_id = _validar_puesto(db, data.get("puesto_id"))
     _validar_usuario_unico(db, usuario, correo)
     u = Usuario(nombre=nombre, usuario=usuario, correo=correo, rol=rol, puesto_id=puesto_id,
                 password_hash=hash_password(pw), activo=True)
     db.add(u)
+    db.flush()
+    _guardar_roles(db, u, data)
     db.commit()
     return usuario_dict(db, u)
 
@@ -285,7 +302,7 @@ def actualizar_usuario(db: Session, u: Usuario, data: dict) -> dict:
     correo = _texto(data, "correo", requerido=False) if "correo" in data else u.correo
     rol = data.get("rol") or u.rol
     if rol not in ROLES:
-        raise NegocioError("El rol debe ser 'administrador' o 'consulta'.")
+        raise NegocioError(f"El rol debe ser uno de {ROLES}.")
     if data.get("puesto_id") not in (None, "") and int(data["puesto_id"]) != u.puesto_id:
         u.puesto_id = _validar_puesto(db, data["puesto_id"])
     _validar_usuario_unico(db, usuario, correo, excluir_id=u.id)
@@ -293,5 +310,6 @@ def actualizar_usuario(db: Session, u: Usuario, data: dict) -> dict:
         u.password_hash = hash_password(_validar_password(data["password"]))
         revocar_sesiones_usuario(db, u.id)
     u.nombre, u.usuario, u.correo, u.rol = nombre, usuario, correo, rol
+    _guardar_roles(db, u, data)
     db.commit()
     return usuario_dict(db, u)

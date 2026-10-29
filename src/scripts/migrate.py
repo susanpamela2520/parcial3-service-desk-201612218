@@ -40,7 +40,8 @@ def migrar() -> list[str]:
         if f.name in hechas:
             continue
         with engine.begin() as c:
-            c.exec_driver_sql(f.read_text(encoding="utf-8"))
+            # cursor del driver sin parámetros: el SQL puede contener '%' literales
+            c.connection.dbapi_connection.cursor().execute(f.read_text(encoding="utf-8"))
             c.execute(text("INSERT INTO schema_migrations (archivo) VALUES (:a)"), {"a": f.name})
         aplicadas.append(f.name)
         print(f"[migrate] aplicada {f.name}")
