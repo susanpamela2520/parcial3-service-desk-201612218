@@ -1,0 +1,12 @@
+# Loop 3 — tras la corrección (cursor del driver sin parámetros) — 2026-10-29T14:12:00-06:00
+$ python -m scripts.migrate   # BD vacía catalogo_loop
+[migrate] aplicada 001_esquema_inicial.sql
+[migrate] aplicada 002_catalogos_base.sql
+[migrate] aplicada 003_service_desk.sql
+[migrate] aplicada 004_cmdb_clasificacion.sql
+exit=0
+$ psql -c "SELECT nivel, referencia_porcentaje FROM nivel_soporte"
+0|20 %
+1|70 %
+2|5 %
+3|5 %

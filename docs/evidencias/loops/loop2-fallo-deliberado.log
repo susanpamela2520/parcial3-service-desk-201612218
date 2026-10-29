@@ -1,0 +1,9 @@
+# Loop 2 — FALLO INTRODUCIDO DELIBERADAMENTE — 2026-10-29T14:11:36-06:00 — commit 64e8b17
+# Cambio: se eliminó en permisos.py el filtro que anula permisos de escritura a usuarios sin rol operativo.
+$ pytest -q tests/test_service_desk.py -k "p06 or p01"
+>       assert con.post(f"/api/tickets/{tid}/tomar").status_code == 403    # 'atender' marcado no eleva a consulta
+E       AssertionError: assert 200 == 403
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +    where <Response [200 OK]> = post('/api/tickets/1/tomar')
+E        +      where post = <starlette.testclient.TestClient object at 0x7f6bb0a0a850>.post
+1 failed, 1 passed, 23 deselected in 4.71s

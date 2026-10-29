@@ -1,0 +1,9 @@
+# Loop 3 — problema de DATOS (real, detectado al preparar el entorno) — reproducido 2026-10-29T14:12:10-06:00 con la versión previa de scripts/migrate.py
+# Entrada: migración 003_service_desk.sql con literales '20 %', '70 %' (porcentajes de referencia de la lección 25)
+$ python -m scripts.migrate   # BD vacía catalogo_loop
+[migrate] aplicada 001_esquema_inicial.sql
+[migrate] aplicada 002_catalogos_base.sql
+[migrate] ERROR: (psycopg.ProgrammingError) only '%s', '%b', '%t' are allowed as placeholders, got '%''
+[SQL: -- 003: Service Desk (parcial 3) — roles múltiples, procesos, colas, tickets, bitácora y CMDB.
+[... SQL completo omitido ...]
+exit=1

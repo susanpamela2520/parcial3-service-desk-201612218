@@ -1,0 +1,3 @@
+# Loop 2 — tras restaurar el filtro — 2026-10-29T14:11:43-06:00
+$ pytest -q tests/test_service_desk.py -k "p06 or p01"
+2 passed, 23 deselected in 5.25s
