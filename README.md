@@ -4,7 +4,7 @@ Software Avanzado, Facultad de Ingeniería, USAC. Aplicación web de Service Des
 
 | | |
 |---|---|
-| **Integrante** | Susan — carné: `__________` |
+| **Integrante** | Susan Pamela Herrera Monzon — carné: `201612218` |
 | **Rama** | `main` |
 | **Tecnologías** | Python 3.12, FastAPI, SQLAlchemy 2, PostgreSQL 16, HTML/JS, Docker Compose |
 
