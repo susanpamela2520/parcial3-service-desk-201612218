@@ -1,0 +1,9 @@
+# Loop 1 — ejecución con fallo — 2026-10-29T14:09:36-06:00 — commit 18bc8c1 + pruebas nuevas sin commit
+$ pytest -q tests/test_service_desk.py -k "p09 and EVENTO"
+            assert c["ag1"].post(f"/api/tickets/{inc}/relaciones", json={"destino_id": tid, "tipo": "INCIDENTE_DE_PROBLEMA"}).status_code == 201
+        assert r.status_code == 409, r.text
+            assert r.status_code == 200, f"{proceso} → {hacia}: {r.text}"
+>       assert t["estado"] == "CERRADO" and t["cerrado_en"] and t["resuelto_en"]
+E       AssertionError: assert ('CERRADO' == 'CERRADO'
+tests/test_service_desk.py:281: AssertionError
+1 failed, 24 deselected in 2.10s

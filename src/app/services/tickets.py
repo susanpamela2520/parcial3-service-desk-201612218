@@ -500,6 +500,9 @@ def transicionar(db: Session, u: Usuario, tid: int, hacia: str, datos: dict | No
         set_["resuelto_en"] = momento
     if hacia == "CERRADO":
         set_["cerrado_en"] = momento
+        if not t["resuelto_en"] and "resuelto_en" not in set_:
+            # Loop 1: E0/E1 se cierran sin estado de respuesta; el cierre es su resolución
+            set_["resuelto_en"] = momento
     asignaciones = ", ".join(f"{k} = CAST(:{k} AS jsonb)" if k == "datos" else f"{k} = :{k}" for k in set_)
     db.execute(text(f"UPDATE ticket SET {asignaciones}, version=version+1, actualizado_en=now() WHERE id=:id"),
                {**set_, "id": tid})

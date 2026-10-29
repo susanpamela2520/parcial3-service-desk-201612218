@@ -27,7 +27,9 @@ from scripts.migrate import migrar  # noqa: E402
 
 PW_ADMIN = "Admin-Prueba-123"
 PW_CONSULTA = "Consulta-Prueba-123"
-TABLAS_DATOS = ["observacion_importacion", "importacion", "sesion", "servicio_n2", "servicio_n1", "mapeo_etiqueta",
+TABLAS_DATOS = ["ticket_bitacora", "ticket_comentario", "ticket_adjunto", "ticket_pausa", "ticket_relacion", "ticket_ci",
+                "notificacion", "ticket", "cola_miembro", "cola", "ci_servicio", "ci_relacion", "ci", "usuario_rol",
+                "observacion_importacion", "importacion", "sesion", "servicio_n2", "servicio_n1", "mapeo_etiqueta",
                 "usuario", "puesto", "seccion", "departamento", "area", "empresa"]
 
 
@@ -42,7 +44,10 @@ def esquema():
 @pytest.fixture(autouse=True)
 def limpiar():
     with engine.begin() as c:
+        c.execute(text("ALTER TABLE ticket_bitacora DISABLE TRIGGER tg_bitacora_inmutable"))
         c.execute(text(f"TRUNCATE {', '.join(TABLAS_DATOS)} RESTART IDENTITY CASCADE"))
+        c.execute(text("ALTER TABLE ticket_bitacora ENABLE TRIGGER tg_bitacora_inmutable"))
+        c.execute(text("DELETE FROM ci_clase WHERE codigo LIKE 'T-%'"))
     yield
 
 
